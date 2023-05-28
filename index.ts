@@ -11,14 +11,6 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
         alias = 'prod';
         tableName = 'hospitals';
     }
-    let queryString: any = event.queryStringParameters;
-    let id: string, sidoNm: string, sigunNm: string;
-    if(queryString && queryString.id)
-        id = queryString.id;
-    if(queryString && queryString.sidoNm)
-        sidoNm = queryString.sidoNm;
-    if(queryString && queryString.sigunNm)
-        sigunNm = queryString.sigunNm;
 
     let response: APIGatewayProxyResultV2 = {
         statusCode: 200,
@@ -40,9 +32,60 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
             database: process.env[`${alias.toUpperCase()}_DB_NAME`]
         });
 
-        let searchUpdateTimeQuery: string = `SELECT updateTime FROM ${tableName} ORDER BY updateTime DESC LIMIT 1`
-        let lastUpdateTime: any = await util.queryMySQL(connection, searchUpdateTimeQuery, []);
-        console.log(`lastUpdateTime: ${JSON.stringify(lastUpdateTime)}, type: ${typeof lastUpdateTime}`);
+        if(event.httpMethod === 'GET'){
+            /** GET Hospital item or items **/
+            let queryString: any = event.queryStringParameters;
+            let id: string, sidoNm: string, sigunNm: string, dongNm: string;
+            if(queryString && queryString.id)
+                id = queryString.id;
+            if(queryString && queryString.sidoNm)
+                sidoNm = decodeURI(queryString.sidoNm);
+            if(queryString && queryString.sigunNm)
+                sigunNm = decodeURI(queryString.sigunNm);
+            if(queryString && queryString.dongNm)
+                dongNm = decodeURI(queryString.dongNm);
+
+            let searchUpdateTimeQuery: string = `SELECT updateTime FROM ${tableName} ORDER BY updateTime DESC LIMIT 1`
+            let updateTimeResult: {updateTime: string} = await util.queryMySQL(connection, searchUpdateTimeQuery, []);
+            let lastUpdateTime: string = updateTimeResult.updateTime;
+
+            let searchQuery: string;
+            let values: any[] = [];
+
+            if(id){
+                searchQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
+                values = [id];
+            }else{
+                if(sigunNm && dongNm) {
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM hospitals_test WHERE (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?) AND (updateTime = ?)`
+                    values = [dongNm, sigunNm, lastUpdateTime];
+                } else if(sigunNm) {
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM hospitals_test WHERE (sigunNm = ?) AND (updateTime = ?)`;
+                    values = [sigunNm, lastUpdateTime];
+                } else if(sidoNm) {
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM hospitals_test WHERE (sidoNm = ?) AND (updateTime = ?)`;
+                    values = [sidoNm, lastUpdateTime];
+                } else {
+                    console.log("The search parameter is required.");
+                    response.statusCode = 400;
+                    responseBody.message = 'The search parameter is required.';
+                    response.body = JSON.stringify(responseBody);
+                    return response;
+                }
+            }
+
+            let items = await util.queryMySQL(connection, searchQuery, values);
+            console.log("Search items", items);
+
+            response.statusCode = 200;
+            responseBody.Items = items;
+            responseBody.message = 'success';
+            response.body = JSON.stringify(responseBody);
+            return response;
+        }else if(event.httpMethod === 'POST'){
+            /** Hospital rating **/
+
+        }
 
         response.statusCode = 200;
         responseBody.message = 'success.';
