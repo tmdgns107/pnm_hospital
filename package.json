@@ -1,0 +1,28 @@
+{
+  "name": "pnm_hospital",
+  "version": "1.0.0",
+  "description": "Hospital data search and information update",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmdgns107/pnm_hospital.git"
+  },
+  "author": "SeungHun",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tmdgns107/pnm_hospital/issues"
+  },
+  "homepage": "https://github.com/tmdgns107/pnm_hospital#readme",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.115",
+    "@types/node": "^20.2.1",
+    "@vercel/ncc": "^0.36.1"
+  },
+  "dependencies": {
+    "mysql2": "^3.3.1",
+    "typescript": "^5.0.4"
+  }
+}

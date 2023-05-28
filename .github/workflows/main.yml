@@ -1,0 +1,36 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+      - name: npm install
+        env:
+          CI: true
+        run: |
+          npm ci
+      - name: Build
+        run: |
+          npx ncc build index.ts
+          zip -j deploy.zip ./dist/*
+      - name: Update Lambda Function Code
+        run: |
+          aws lambda update-function-code --function-name petNmatHospital --zip-file fileb://deploy.zip
+      - name: Publish Lambda Function Version
+        run: |
+          VERSION=$(aws lambda publish-version --function-name petNmatHospital --query 'Version' --output text)
