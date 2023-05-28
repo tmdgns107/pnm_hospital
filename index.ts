@@ -57,13 +57,13 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
                 values = [id];
             }else{
                 if(sigunNm && dongNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM hospitals_test WHERE (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?) AND (updateTime = ?)`
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?) AND (updateTime = ?)`
                     values = [dongNm, sigunNm, lastUpdateTime];
                 } else if(sigunNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM hospitals_test WHERE (sigunNm = ?) AND (updateTime = ?)`;
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sigunNm = ?) AND (updateTime = ?)`;
                     values = [sigunNm, lastUpdateTime];
                 } else if(sidoNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM hospitals_test WHERE (sidoNm = ?) AND (updateTime = ?)`;
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sidoNm = ?) AND (updateTime = ?)`;
                     values = [sidoNm, lastUpdateTime];
                 } else {
                     console.log("The search parameter is required.");
@@ -74,6 +74,8 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
                 }
             }
 
+            console.log("searchQuery", searchQuery);
+            console.log("values", values);
             let items = await util.queryMySQL(connection, searchQuery, values);
             console.log("Search items", items);
 
