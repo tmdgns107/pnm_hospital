@@ -42,7 +42,7 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
 
         let searchUpdateTimeQuery: string = `SELECT updateTime FROM ${tableName} ORDER BY updateTime DESC LIMIT 1`
         let lastUpdateTime: any = await util.queryMySQL(connection, searchUpdateTimeQuery, []);
-        console.log(`lastUpdateTime: ${lastUpdateTime}, type: ${typeof lastUpdateTime}`);
+        console.log(`lastUpdateTime: ${JSON.stringify(lastUpdateTime)}, type: ${typeof lastUpdateTime}`);
 
         response.statusCode = 200;
         responseBody.message = 'success.';
