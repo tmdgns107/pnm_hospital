@@ -45,10 +45,6 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
             if(queryString && queryString.dongNm)
                 dongNm = decodeURI(queryString.dongNm);
 
-            let searchUpdateTimeQuery: string = `SELECT updateTime FROM ${tableName} ORDER BY updateTime DESC LIMIT 1`
-            let updateTimeResult: {updateTime: string} = await util.queryMySQL(connection, searchUpdateTimeQuery, []);
-            let lastUpdateTime: string = updateTimeResult.updateTime;
-
             let searchQuery: string;
             let values: any[] = [];
 
@@ -57,14 +53,14 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
                 values = [id];
             }else{
                 if(sigunNm && dongNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?) AND (updateTime = ?)`
-                    values = [dongNm, sigunNm, lastUpdateTime];
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?) AND (status <> '폐업')`
+                    values = [dongNm, sigunNm];
                 } else if(sigunNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sigunNm = ?) AND (updateTime = ?)`;
-                    values = [sigunNm, lastUpdateTime];
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sigunNm = ?) AND (status <> '폐업')`;
+                    values = [sigunNm];
                 } else if(sidoNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sidoNm = ?) AND (updateTime = ?)`;
-                    values = [sidoNm, lastUpdateTime];
+                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sidoNm = ?) AND (status <> '폐업')`;
+                    values = [sidoNm];
                 } else {
                     console.log("The search parameter is required.");
                     response.statusCode = 400;
