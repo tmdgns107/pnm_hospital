@@ -52,14 +52,15 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
                 searchQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
                 values = [id];
             }else{
-                if(sigunNm && dongNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?) AND (status <> '폐업')`
+                let whereClause: string = "(status <> '폐업')";
+                if (sigunNm && dongNm) {
+                    whereClause += " AND (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?)";
                     values = [dongNm, sigunNm];
-                } else if(sigunNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sigunNm = ?) AND (status <> '폐업')`;
+                } else if (sigunNm) {
+                    whereClause += " AND (sigunNm = ?)";
                     values = [sigunNm];
-                } else if(sidoNm) {
-                    searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE (sidoNm = ?) AND (status <> '폐업')`;
+                } else if (sidoNm) {
+                    whereClause += " AND (sidoNm = ?)";
                     values = [sidoNm];
                 } else {
                     console.log("The search parameter is required.");
@@ -68,6 +69,7 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
                     response.body = JSON.stringify(responseBody);
                     return response;
                 }
+                searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE ${whereClause}`;
             }
 
             console.log("searchQuery", searchQuery);
