@@ -11,6 +11,8 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
         alias = 'prod';
         tableName = 'hospitals';
     }
+    if(event.path && event.path.includes('pharmacy'))
+        tableName = tableName.replace('hospitals', 'pharmacies');
 
     let response: APIGatewayProxyResultV2 = {
         statusCode: 200,
