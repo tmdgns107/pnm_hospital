@@ -48,9 +48,9 @@ You can get information about hospitals or pharmacies by sending a GET request t
 
 Query parameters:
 - id: Get a specific item by its ID.
-- sidoNm: Get items from a specific province.
+- sidoNm: Get items from a specific province. (Currently not in use)
 - sigunNm: Get items from a specific city or county.
-- dongNm: Get items from a specific neighborhood.
+- dongNm: Get items from a specific neighborhood. (sigunNm is also required when used)
   
 ### POST
 (To be implemented) Update or create hospital/pharmacy information.
