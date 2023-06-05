@@ -16,6 +16,7 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
 
     let response: APIGatewayProxyResultV2 = {
         statusCode: 200,
+        headers: {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Credentials': true},
         body: ''
     };
     let responseBody: { message: string; Items: any[] } = {
