@@ -35,63 +35,53 @@ export const handler: Handler = async (event: APIGatewayProxyEvent): Promise<API
             database: process.env[`${alias.toUpperCase()}_DB_NAME`]
         });
 
-        if(event.httpMethod === 'GET'){
-            /** GET Hospital item or items **/
-            let queryString: any = event.queryStringParameters;
-            let id: string, sidoNm: string, sigunNm: string, dongNm: string;
-            if(queryString && queryString.id)
-                id = queryString.id;
-            if(queryString && queryString.sidoNm)
-                sidoNm = decodeURI(queryString.sidoNm);
-            if(queryString && queryString.sigunNm)
-                sigunNm = decodeURI(queryString.sigunNm);
-            if(queryString && queryString.dongNm)
-                dongNm = decodeURI(queryString.dongNm);
+        /** GET Hospital item or items **/
+        let queryString: any = event.queryStringParameters;
+        let id: string, sidoNm: string, sigunNm: string, dongNm: string;
+        if(queryString && queryString.id)
+            id = queryString.id;
+        if(queryString && queryString.sidoNm)
+            sidoNm = decodeURI(queryString.sidoNm);
+        if(queryString && queryString.sigunNm)
+            sigunNm = decodeURI(queryString.sigunNm);
+        if(queryString && queryString.dongNm)
+            dongNm = decodeURI(queryString.dongNm);
 
-            let searchQuery: string;
-            let values: any[] = [];
+        let searchQuery: string;
+        let values: any[] = [];
 
-            if(id){
-                searchQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
-                values = [id];
-            }else{
-                let whereClause: string = "(status <> '폐업')";
-                if (sigunNm && dongNm) {
-                    whereClause += " AND (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?)";
-                    values = [dongNm, sigunNm];
-                } else if (sigunNm) {
-                    whereClause += " AND (sigunNm = ?)";
-                    values = [sigunNm];
-                } else if (sidoNm) {
-                    whereClause += " AND (sidoNm = ?)";
-                    values = [sidoNm];
-                } else {
-                    console.log("The search parameter is required.");
-                    response.statusCode = 400;
-                    responseBody.message = 'The search parameter is required.';
-                    response.body = JSON.stringify(responseBody);
-                    return response;
-                }
-                searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE ${whereClause}`;
+        if(id){
+            searchQuery = `SELECT * FROM ${tableName} WHERE id = ?`;
+            values = [id];
+        }else{
+            let whereClause: string = "(status <> '폐업')";
+            if (sigunNm && dongNm) {
+                whereClause += " AND (lotNoAddr LIKE CONCAT('%', ?, '%')) AND (sigunNm = ?)";
+                values = [dongNm, sigunNm];
+            } else if (sigunNm) {
+                whereClause += " AND (sigunNm = ?)";
+                values = [sigunNm];
+            } else if (sidoNm) {
+                whereClause += " AND (sidoNm = ?)";
+                values = [sidoNm];
+            } else {
+                console.log("The search parameter is required.");
+                response.statusCode = 400;
+                responseBody.message = 'The search parameter is required.';
+                response.body = JSON.stringify(responseBody);
+                return response;
             }
-
-            console.log("searchQuery", searchQuery);
-            console.log("values", values);
-            let items = await util.queryMySQL(connection, searchQuery, values);
-            console.log("Search items", items);
-
-            response.statusCode = 200;
-            responseBody.Items = items;
-            responseBody.message = 'success';
-            response.body = JSON.stringify(responseBody);
-            return response;
-        }else if(event.httpMethod === 'POST'){
-            /** Hospital rating **/
-
+            searchQuery = `SELECT id, sidoNm, sigunNm, bizPlcNm, roadNmAddr, lotNoAddr, lat, lng FROM ${tableName} WHERE ${whereClause}`;
         }
 
+        console.log("searchQuery", searchQuery);
+        console.log("values", values);
+        let items = await util.queryMySQL(connection, searchQuery, values);
+        console.log("Search items", items);
+
         response.statusCode = 200;
-        responseBody.message = 'success.';
+        responseBody.Items = items;
+        responseBody.message = 'success';
         response.body = JSON.stringify(responseBody);
         return response;
     } catch (e) {
